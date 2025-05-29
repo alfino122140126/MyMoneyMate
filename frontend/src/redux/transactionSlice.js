@@ -3,7 +3,6 @@ import {
   createAsyncThunk
 } from '@reduxjs/toolkit';
 import api from '../api/axios'; // Import the configured axios instance
-import axios from 'axios'; // Import the default axios instance to remove later
 const initialState = {
   transactions: [],
   status: 'idle', // 'idle' | 'loading' | 'succeeded' | 'failed'
@@ -13,37 +12,53 @@ const initialState = {
 // Async Thunks
 export const fetchTransactions = createAsyncThunk(
   'transactions/fetchTransactions',
-  async() => {
-    const response = await api.get('/api/transactions');
-    return response.data;
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await api.get('/api/transactions');
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response.data);
+    }
   }
 );
 
 export const addTransaction = createAsyncThunk(
   'transactions/addTransaction',
-  async (newTransaction) => {
-    const response = await api.post('/api/transactions', newTransaction);
-    return response.data;
+  async (newTransaction, { rejectWithValue }) => {
+    try {
+      const response = await api.post('/api/transactions', newTransaction);
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response.data);
+    }
   }
 );
 
 export const updateTransaction = createAsyncThunk(
   'transactions/updateTransaction',
-  async (updatedTransaction) => {
+  async (updatedTransaction, { rejectWithValue }) => {
     const {
       id,
       ...rest
     } = updatedTransaction;
-    const response = await api.put(`/api/transactions/${id}`, rest);
-    return response.data;
+    try {
+      const response = await api.put(`/api/transactions/${id}`, rest);
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response.data);
+    }
   }
 );
 
 export const deleteTransaction = createAsyncThunk(
   'transactions/deleteTransaction',
   async(transactionId) => {
-    await api.delete(`/api/transactions/${transactionId}`);
-    return transactionId; // Return the ID to remove from state
+ try {
+ await api.delete(`/api/transactions/${transactionId}`);
+      return transactionId; // Return the ID to remove from state
+    } catch (error) {
+      return rejectWithValue(error.response.data);
+    }
   }
 );
 
@@ -64,7 +79,7 @@ const transactionSlice = createSlice({
       })
       .addCase(fetchTransactions.rejected, (state, action) => {
         state.status = 'failed';
-        state.error = action.error.message;
+        state.error = action.payload; // Use action.payload from rejectWithValue
       })
       .addCase(addTransaction.fulfilled, (state, action) => {
         state.transactions.push(action.payload);
@@ -77,13 +92,22 @@ const transactionSlice = createSlice({
           state.transactions[index] = action.payload;
         }
       })
+      .addCase(addTransaction.rejected, (state, action) => {
+        state.error = action.payload; // Handle error for adding
+      })
       .addCase(deleteTransaction.fulfilled, (state, action) => {
         state.transactions = state.transactions.filter(
           (transaction) => transaction.id !== action.payload
         );
+        );
+      })
+      .addCase(updateTransaction.rejected, (state, action) => {
+        state.error = action.payload; // Handle error for updating
       });
-  },
-});
+    })
+    .addCase(deleteTransaction.rejected, (state, action) => {
+      state.error = action.payload; // Handle error for deleting
+    });
 
 export const selectAllTransactions = (state) => state.transactions.transactions;
 export const selectTransactionById = (state, transactionId) =>
