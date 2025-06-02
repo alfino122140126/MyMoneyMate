@@ -2,9 +2,17 @@ from pyramid.paster import get_app, setup_logging
 from waitress import serve
 import os
 
-if __name__ == '__main__':
-    config_uri = os.environ.get('PYRAMID_CONFIG', 'development.ini')
-    setup_logging(config_uri)
-    app = get_app(config_uri)
-    # Pastikan host 0.0.0.0 agar bisa diakses dari luar container
-    serve(app, host='0.0.0.0', port=6543)
+# Load .env ke os.environ
+load_dotenv()
+
+# Impor fungsi main() kita yang meng-return WSGI app
+from src import main
+
+# Bangun app
+app = main({}, **{})
+
+if __name__ == "__main__":
+    # Jalankan dengan Waitress
+    from waitress import serve
+    port = int(os.environ.get("PORT", 6543))
+    serve(app, host="0.0.0.0", port=port)
