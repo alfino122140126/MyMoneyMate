@@ -1,112 +1,172 @@
-# Financial Management Backend API
+# MyMoneyMate(Financial Management Backend API)
 
-A RESTful API built with Python Pyramid framework for managing personal finances, including transactions, budgets, and categories.
+A RESTful API built with Python Pyramid for managing personal finances: transactions, budgets, and categories.
 
-## Features
+---
 
-- User authentication with JWT tokens
-- Transaction management (create, read, update, delete)
-- Budget tracking
-- Category organization
-- RESTful API endpoints
-- SQLAlchemy ORM integration
-- CORS support for frontend integration
+## Fitur Utama
 
-## Project Structure
+* Autentikasi pengguna dengan JWT
+* CRUD transaksi (create, read, update, delete)
+* Pelacakan anggaran (budgets)
+* Pengelompokan kategori (categories)
+* SQLAlchemy ORM
+* Dukungan CORS untuk frontend
 
-```
-backend/
-├── setup.py                # Package configuration
-├── development.ini         # Development configuration
-├── requirements.txt        # Python dependencies
-├── myapp/                  # Application package
-│   ├── __init__.py         # Package initialization
-│   ├── models/             # SQLAlchemy models
-│   ├── views/              # View functions for API endpoints
-│   ├── scripts/            # Utility scripts
-│   ├── routes.py           # Route definitions
-│   └── security.py         # Authentication configuration
-└── tests/                  # Test package
-    ├── conftest.py         # Test fixtures
-    ├── test_auth.py        # Authentication tests
-    ├── test_transactions.py # Transaction tests
-    ├── test_budgets.py     # Budget tests
-    └── test_categories.py  # Category tests
-```
+---
 
-## Installation
+## Persyaratan
 
-1. Create a virtual environment:
+* Python 3.10+
+* pip
+* virtualenv (direkomendasikan)
+* (Opsional) PostgreSQL atau MySQL; default menggunakan SQLite
+
+---
+
+## Instalasi & Setup
+
+1. **Buat Virtual Environment & Aktifkan**
+
+   ```bash
+   cd backend
+   python -m venv .venv
+   # Linux/macOS:
+   source .venv/bin/activate
+   # Windows (PowerShell):
+   .venv\Scripts\Activate.ps1
    ```
-   python -m venv venv
-   source venv/bin/activate  # On Windows: venv\Scripts\activate
-   ```
+2. **Install Dependensi**
 
-2. Install the package in development mode:
-   ```
+   ```bash
+   pip install -r requirements.txt
    pip install -e .
    ```
+3. **Atur Environment Variables (opsional)**
 
-3. Initialize the database:
-   ```
+   * `JWT_SECRET` (jika berbeda dari nilai di `development.ini`)
+   * `DATABASE_URL` (meng-override `sqlalchemy.url` di .ini)
+   * `PYRAMID_SETTINGS` (jika menggunakan file .ini lain)
+4. **Inisialisasi Database**
+
+   ```bash
    initialize_db development.ini --reset-db
    ```
 
-4. Start the development server:
-   ```
+   Script ini akan membuat semua tabel. Jika menggunakan SQLite, file `database.sqlite` akan dibuat otomatis. Pastikan database PostgreSQL/MySQL sudah ada jika menggunakan DB tersebut.
+5. **Jalankan Server**
+
+   ```bash
    pserve development.ini --reload
    ```
 
+   Backend berjalan di `http://localhost:6543` (default). Opsi `--reload` memaksa server restart otomatis saat kode berubah.
+
+---
+
 ## Environment Variables
 
-- `PYRAMID_SETTINGS`: Path to configuration file (default: development.ini)
-- `JWT_SECRET`: Secret key for JWT token generation
-- `DATABASE_URL`: Database connection URL (overrides sqlalchemy.url in .ini file)
+* `PYRAMID_SETTINGS`
+  Path ke file .ini (default: `development.ini`).
+* `JWT_SECRET`
+  Kunci rahasia untuk JWT (meng-override nilai di .ini).
+* `DATABASE_URL`
+  URL koneksi database (meng-override `sqlalchemy.url` di .ini).
 
-## API Endpoints
+---
 
-### Authentication
+## Endpoint API
 
-- `POST /auth/register` - Register a new user
-- `POST /auth/login` - Login and get JWT token
+Semua endpoint CRUD memerlukan header:
 
-### Transactions
+```
+Authorization: Bearer <JWT_TOKEN>
+```
 
-- `GET /transactions` - Get all transactions for the authenticated user
-- `POST /transactions` - Create a new transaction
-- `GET /transactions/{id}` - Get a specific transaction
-- `PUT /transactions/{id}` - Update a transaction
-- `DELETE /transactions/{id}` - Delete a transaction
+### Autentikasi
+
+* **POST /auth/register**
+
+  * Body JSON:
+
+    ```json
+    {
+      "username": "nama_user",
+      "password": "password_rahasia"
+    }
+    ```
+  * Respon (201):
+
+    ```json
+    {
+      "id": 1,
+      "username": "nama_user",
+      "token": "<JWT_TOKEN_BARU>"
+    }
+    ```
+* **POST /auth/login**
+
+  * Body JSON: sama dengan register
+  * Respon (200):
+
+    ```json
+    {
+      "id": 1,
+      "username": "nama_user",
+      "token": "<JWT_TOKEN_BARU>"
+    }
+    ```
+
+### Transaksi
+
+| Method | URL                  | Body JSON                                                     | Response                                                |
+| ------ | -------------------- | ------------------------------------------------------------- | ------------------------------------------------------- |
+| GET    | `/transactions`      | – (header Bearer)                                             | `[ { id, amount, description, date, category_id }, … ]` |
+| POST   | `/transactions`      | `{ "amount", "description", "date": ISO8601, "category_id" }` | `{ "id", "message": "Transaction created" }`            |
+| GET    | `/transactions/{id}` | –                                                             | `{ id, amount, description, date, category_id }`        |
+| PUT    | `/transactions/{id}` | `{ "amount", "description", "date", "category_id" }`          | `{ id, amount, description, date, category_id }`        |
+| DELETE | `/transactions/{id}` | –                                                             | *204 No Content*                                        |
 
 ### Budgets
 
-- `GET /budgets` - Get all budgets for the authenticated user
-- `POST /budgets` - Create a new budget
-- `GET /budgets/{id}` - Get a specific budget
-- `PUT /budgets/{id}` - Update a budget
-- `DELETE /budgets/{id}` - Delete a budget
+| Method | URL             | Body JSON                                                 | Response                                     |
+| ------ | --------------- | --------------------------------------------------------- | -------------------------------------------- |
+| GET    | `/budgets`      | –                                                         | `[ { id, total, start_date, end_date }, … ]` |
+| POST   | `/budgets`      | `{ "total", "start_date": ISO8601, "end_date": ISO8601 }` | `{ "id", "message": "Budget created" }`      |
+| GET    | `/budgets/{id}` | –                                                         | `{ id, total, start_date, end_date }`        |
+| PUT    | `/budgets/{id}` | `{ "total", "start_date": ISO8601, "end_date": ISO8601 }` | `{ id, total, start_date, end_date }`        |
+| DELETE | `/budgets/{id}` | –                                                         | *204 No Content*                             |
 
 ### Categories
 
-- `GET /categories` - Get all categories for the authenticated user
-- `POST /categories` - Create a new category
-- `GET /categories/{id}` - Get a specific category
-- `PUT /categories/{id}` - Update a category
-- `DELETE /categories/{id}` - Delete a category
+| Method | URL                | Body JSON    | Response                                  |
+| ------ | ------------------ | ------------ | ----------------------------------------- |
+| GET    | `/categories`      | –            | `[ { id, name, user_id }, … ]`            |
+| POST   | `/categories`      | `{ "name" }` | `{ "id", "message": "Category created" }` |
+| GET    | `/categories/{id}` | –            | `{ id, name, user_id }`                   |
+| PUT    | `/categories/{id}` | `{ "name" }` | `{ id, name, user_id }`                   |
+| DELETE | `/categories/{id}` | –            | *204 No Content*                          |
 
-## Running Tests
+---
 
-```
-pytest --cov=myapp
-```
 
-## Deployment
+## Kontribusi
 
-For production deployment, use a proper WSGI server like Gunicorn or Waitress:
+1. Fork repo ini.
+2. Buat branch baru:
 
-```
-pip install waitress
-waitress-serve --port=8000 myapp:main
-```
+   ```
+   git checkout -b fitur/nama-fitur
+   ```
+3. Tambahkan fitur/perbaikan, sertakan unit test jika perlu.
+4. Commit & push:
 
-With Nginx as a reverse proxy for handling SSL/TLS termination and serving static files.
+   ```
+   git add .
+   git commit -m "Menambahkan fitur X"
+   git push origin fitur/nama-fitur
+   ```
+5. Buka Pull Request ke `main`.
+
+---
+
