@@ -1,12 +1,17 @@
-# React + Vite
+## Frontend (ReactJS)
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
-
-Currently, two official plugins are available:
-
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+- Framework: ReactJS (Vite + TypeScript)  
+- Functional components dengan React Hooks  
+- Routing: React Router DOM  
+- State management: Redux Toolkit  
+- UI responsif menggunakan Tailwind CSS  
+- Integrasi ke backend via Axios:
+  - Base URL: `http://localhost:6543`
+  - Interceptor untuk menyertakan header `Authorization: Bearer <token>`
+- Struktur folder:
+  - `src/components/` (Layout, Navbar, Sidebar, ProtectedRoute, PublicRoute)
+  - `src/hooks/` (useMediaQuery, useLocalStorage, redux hook)
+  - `src/pages/` (DashboardPage, LoginPage, TransactionsPage)
+  - `src/services/` (api.ts, authService.ts, transactionService.ts, budgetService.ts, categoryService.ts)
+  - `src/store/` (Redux slices: authSlice, transactionSlice, budgetSlice, categorySlice, uiSlice)
+  - `src/utils/formatters.ts`  
