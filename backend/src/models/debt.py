@@ -13,3 +13,5 @@ class Debt(Base):
     is_paid     = Column(Integer, default=0)  # 0 = belum, 1 = sudah
     due_date    = Column(DateTime(timezone=True))
     description = Column(String(255))
+    def __repr__(self):
+        return f"<Account(id={self.id})>" # Ganti dengan representasi yang lebih baik

@@ -3,8 +3,9 @@ services:
     image: postgres:17
     restart: always
     environment:
-      POSTGRES_USER: finance
-      POSTGRES_PASSWORD: finance
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: admin123
+      POSTGRES_HOST_AUTH_METHOD: trust
       POSTGRES_DB: finance_db
     volumes:
       - pgdata:/var/lib/postgresql/data
@@ -29,6 +30,6 @@ services:
     volumes:
       - ./frontend:/app          # mount kode dari host
       - /app/node_modules 
-
+      
 volumes:
   pgdata:

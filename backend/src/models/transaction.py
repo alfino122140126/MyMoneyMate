@@ -13,3 +13,5 @@ class Transaction(Base):
     category   = Column(String(50))
     timestamp  = Column(DateTime(timezone=True), server_default=func.now())
     description= Column(String(255))
+    def __repr__(self):
+        return f"<Transaction(id={self.id})>" # Ganti dengan representasi yang lebih baia
