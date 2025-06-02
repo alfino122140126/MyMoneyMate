@@ -1,8 +1,7 @@
 from sqlalchemy import engine_from_config
-from sqlalchemy.ext.declarative import declarative_base
+from .base import Base
 from sqlalchemy.orm import sessionmaker
-
-Base = declarative_base()
+from . import user, account, transaction, debt, category
 
 def get_engine(settings):
     # settings['sqlalchemy.url'] injected in main()

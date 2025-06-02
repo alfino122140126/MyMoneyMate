@@ -3,8 +3,8 @@ services:
     image: postgres:17
     restart: always
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: alfino123
+      POSTGRES_USER: finance
+      POSTGRES_PASSWORD: finance
       POSTGRES_DB: finance_db
     volumes:
       - pgdata:/var/lib/postgresql/data
@@ -23,12 +23,12 @@ services:
 
   frontend:
     build: ./frontend
-    command: ["npm","run","dev"]
-    working_dir: /app
-    volumes:
-      - ./frontend:/app
     ports:
       - "5173:5173"
+    command: ["npm","run","dev"]
+    volumes:
+      - ./frontend:/app          # mount kode dari host
+      - /app/node_modules 
 
 volumes:
   pgdata:
